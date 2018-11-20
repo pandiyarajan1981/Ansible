@@ -1,0 +1,20 @@
+    - name: Install Ad-Domain-Services
+      win_feature:
+        name: AD-Domain-Services
+        include_management_tools: yes
+        include_sub_features: yes
+ 
+    - name: Promote to domain controller
+      win_domain:                  
+        dns_domain_name: "{{ ad_domain_name }}"
+        safe_mode_password: "{{ ad_safe_mode_password }}"
+      register: result
+
+    - name: Reboot upon promotion
+      win_reboot:
+      when: result.reboot_required
+
+    - name: Display available  Domain list 
+      win_shell: "nltest /dclist:{{ ad_domain_name }}"
+      register: display_domain_list
+    - debug: var=display_domain_list
